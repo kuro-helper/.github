@@ -1,0 +1,30 @@
+name: Commit Lint
+
+on:
+  workflow_call:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Caller repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.24.0"
+
+      - name: Checkout Common lint Scripts
+        uses: actions/checkout@v5
+        with:
+          repository: kuro-helper/.github
+          path: common-lint
+
+      - name: Run Common Lint Script
+        run: go run common-lint/scripts/check_commit.go
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_HEAD_REF: ${{ github.event.pull_request.head.ref || '' }}
