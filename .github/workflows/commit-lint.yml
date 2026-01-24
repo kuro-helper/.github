@@ -16,8 +16,6 @@ jobs:
             echo "❌ Error: branch name '$BRANCH_NAME' non-compliant with regulations!"
             exit 1
           fi
-
-jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
