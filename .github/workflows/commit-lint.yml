@@ -9,9 +9,9 @@ jobs:
     steps:
       - name: Check branch name
         run: |
-          PATTERN="^(main$|(feature|bugfix|hotfix|enhancement|release|refactor|ci|style|docs|chore)\/.*$)"
+          PATTERN="^(main$|v[0-9].*$|(feature|bugfix|hotfix|enhancement|release|refactor|ci|style|docs|chore)\/.*$)"
           BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
-          
+
           if [[ ! $BRANCH_NAME =~ $PATTERN ]]; then
             echo "❌ Error: branch name '$BRANCH_NAME' non-compliant with regulations!"
             exit 1
