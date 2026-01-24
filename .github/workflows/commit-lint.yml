@@ -4,6 +4,20 @@ on:
   workflow_call:
 
 jobs:
+  check-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        run: |
+          PATTERN="^(main$|(feature|bugfix|hotfix|enhancement|release|refactor|ci|style|docs|chore)\/.*$)"
+          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+          
+          if [[ ! $BRANCH_NAME =~ $PATTERN ]]; then
+            echo "❌ Error: branch name '$BRANCH_NAME' non-compliant with regulations!"
+            exit 1
+          fi
+
+jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
