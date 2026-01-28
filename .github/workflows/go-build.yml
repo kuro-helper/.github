@@ -39,12 +39,21 @@ jobs:
         with:
           go-version: "1.24.0"
 
-      # 4. 動態生成 go.work
-      - name: Initialize Go Workspace
-        run: |
-          go work init ./main
-          if [ -d "./kurohelpercore" ]; then go work use ./kurohelpercore; fi
-          if [ -d "./kurohelperdb" ]; then go work use ./kurohelperdb; fi
+      - name: Link Local Dependencies
+          run: |
+            cd main
+            if [ -d "../kurohelpercore" ]; then
+              echo "Linking kurohelper-core to ../kurohelpercore"
+              go mod edit -replace kurohelper-core=../kurohelpercore
+            fi
+            
+            if [ -d "../kurohelperdb" ]; then
+              echo "Linking kurohelper-db to ../kurohelperdb"
+              go mod edit -replace kurohelper-db=../kurohelperdb
+            fi
+            
+            echo "Updated go.mod content:"
+            cat go.mod
 
       - name: Build
         run: |
