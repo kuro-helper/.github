@@ -1,0 +1,55 @@
+name: Go Build
+
+on:
+  workflow_call:
+    inputs:
+      use_kurohelpercore:
+        type: string
+        default: ''
+      use_kurohelperdb:
+        type: string
+        default: ''
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: main
+
+      - name: Checkout kurohelper-core
+        if: ${{ inputs.use_kurohelpercore != '' }} 
+        uses: actions/checkout@v5
+        with:
+          repository: kuro-helper/kurohelper-core
+          ref: ${{ inputs.use_kurohelpercore }}
+          path: kurohelpercore
+
+      - name: Checkout kurohelper-db
+        if: ${{ inputs.use_kurohelperdb != '' }} 
+        uses: actions/checkout@v5
+        with:
+          repository: kuro-helper/kurohelper-db
+          ref: ${{ inputs.use_kurohelperdb }}
+          path: kurohelperdb
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.24.0"
+
+      # 4. 動態生成 go.work
+      - name: Initialize Go Workspace
+        run: |
+          go work init ./main
+          if [ -d "./kurohelpercore" ]; then go work use ./kurohelpercore; fi
+          if [ -d "./kurohelperdb" ]; then go work use ./kurohelperdb; fi
+
+      - name: Build
+        run: |
+          cd main
+          go build -v ./...
+
+      # - name: Test
+      #   run: go test -v ./...
