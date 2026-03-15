@@ -11,11 +11,17 @@ import (
 
 func main() {
 	eventName := os.Getenv("GITHUB_EVENT_NAME")
-	headBranch := os.Getenv("GITHUB_HEAD_REF")
+	headRef := os.Getenv("GITHUB_HEAD_REF")
+	baseRef := os.Getenv("GITHUB_BASE_REF")
 
 	var cmd *exec.Cmd
-	if eventName == "pull_request" && headBranch != "" {
-		cmd = exec.Command("git", "log", "--pretty=format:%s", "origin/"+headBranch)
+	if eventName == "pull_request" && headRef != "" {
+		// base..head
+		refRange := "origin/" + headRef
+		if baseRef != "" {
+			refRange = "origin/" + baseRef + "..origin/" + headRef
+		}
+		cmd = exec.Command("git", "log", "--pretty=format:%s", refRange)
 	} else {
 		cmd = exec.Command("git", "log", "--pretty=format:%s", "-1", "HEAD")
 	}
