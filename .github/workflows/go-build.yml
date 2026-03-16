@@ -9,6 +9,9 @@ on:
       use_kurohelperdb:
         type: string
         default: ''
+      use_kurohelperproxy:
+        type: string
+        default: ''
 
 jobs:
   build:
@@ -33,6 +36,14 @@ jobs:
           repository: kuro-helper/kurohelper-db
           ref: ${{ inputs.use_kurohelperdb }}
           path: kurohelperdb
+      
+      - name: Checkout kurohelper-proxy
+        if: ${{ inputs.use_kurohelperproxy != '' }} 
+        uses: actions/checkout@v5
+        with:
+          repository: kuro-helper/kurohelper-proxy
+          ref: ${{ inputs.use_kurohelperproxy }}
+          path: kurohelperproxy
 
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -51,6 +62,11 @@ jobs:
             if [ -d "../kurohelperdb" ]; then
               echo "Linking kurohelper-db to ../kurohelperdb"
               go mod edit -replace kurohelper-db=../kurohelperdb
+            fi
+
+             if [ -d "../kurohelperproxy" ]; then
+              echo "Linking kurohelper-proxy to ../kurohelperproxy"
+              go mod edit -replace kurohelper-proxy=../kurohelperproxy
             fi
             
             echo "Updated go.mod content:"
