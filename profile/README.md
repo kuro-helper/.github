@@ -15,25 +15,17 @@ KuroHelper 是一個專注於視覺小說（Galgame）領域的開源專案組�
 
 ## 專案架構
 
-### 🤖 [discordbot](https://github.com/kuro-helper/discordbot)
+### 🤖 [kurohelper](https://github.com/kuro-helper/kurohelper)
 
 Discord 機器人應用，提供互動式查詢與管理功能，讓使用者能透過熟悉的平台快速取得所需資訊。
 
-### ⚙️ [core](https://github.com/kuro-helper/core)
+### 🧠 [kurohelper-service](https://github.com/kuro-helper/kurohelper-service)
 
-底層核心模組，封裝業務邏輯與通用功能，為上層應用提供穩定的基礎服務。
-
-### 🗄️ [db](https://github.com/kuro-helper/db)
-
-核心資料庫模組，提供統一的資料存取層。
+底層核心模組，封裝業務邏輯、資料存取與通用功能，為上層應用提供穩定的基礎服務。
 
 ### 🌐 [api](https://github.com/kuro-helper/api)(開發中)
 
 RESTful API 服務，對外提供標準化的資料查詢與操作介面，支援多種應用場景整合。
-
-### 🔌 [proxy](https://github.com/kuro-helper/proxy)
-
-代理服務模組，提供網路代理與連線管理功能，確保系統穩定運行。
 
 ## 貢獻指南
 
