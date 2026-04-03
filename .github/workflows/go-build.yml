@@ -3,13 +3,7 @@ name: Go Build
 on:
   workflow_call:
     inputs:
-      use_kurohelpercore:
-        type: string
-        default: ''
-      use_kurohelperdb:
-        type: string
-        default: ''
-      use_kurohelperproxy:
+      use_kurohelperservice:
         type: string
         default: ''
 
@@ -21,29 +15,13 @@ jobs:
         with:
           path: main
 
-      - name: Checkout kurohelper-core
-        if: ${{ inputs.use_kurohelpercore != '' }} 
+      - name: Checkout kurohelper-service
+        if: ${{ inputs.use_kurohelperservice != '' }} 
         uses: actions/checkout@v5
         with:
-          repository: kuro-helper/kurohelper-core
-          ref: ${{ inputs.use_kurohelpercore }}
-          path: kurohelpercore
-
-      - name: Checkout kurohelper-db
-        if: ${{ inputs.use_kurohelperdb != '' }} 
-        uses: actions/checkout@v5
-        with:
-          repository: kuro-helper/kurohelper-db
-          ref: ${{ inputs.use_kurohelperdb }}
-          path: kurohelperdb
-      
-      - name: Checkout kurohelper-proxy
-        if: ${{ inputs.use_kurohelperproxy != '' }} 
-        uses: actions/checkout@v5
-        with:
-          repository: kuro-helper/kurohelper-proxy
-          ref: ${{ inputs.use_kurohelperproxy }}
-          path: kurohelperproxy
+          repository: kuro-helper/kurohelper-service
+          ref: ${{ inputs.use_kurohelperservice }}
+          path: kurohelperservice
 
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -54,19 +32,9 @@ jobs:
       - name: Link Local Dependencies
         run: |
             cd main
-            if [ -d "../kurohelpercore" ]; then
-              echo "Linking kurohelper-core to ../kurohelpercore"
-              go mod edit -replace kurohelper-core=../kurohelpercore
-            fi
-            
-            if [ -d "../kurohelperdb" ]; then
-              echo "Linking kurohelper-db to ../kurohelperdb"
-              go mod edit -replace kurohelper-db=../kurohelperdb
-            fi
-
-             if [ -d "../kurohelperproxy" ]; then
-              echo "Linking kurohelper-proxy to ../kurohelperproxy"
-              go mod edit -replace kurohelper-proxy=../kurohelperproxy
+            if [ -d "../kurohelperservice" ]; then
+              echo "Linking kurohelperservice to ../kurohelperservice"
+              go mod edit -replace kurohelperservice=../kurohelperservice
             fi
             
             echo "Updated go.mod content:"
