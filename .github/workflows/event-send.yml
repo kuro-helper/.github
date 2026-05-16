@@ -29,8 +29,8 @@ jobs:
         if: github.event_name == 'push'
         continue-on-error: true
         run: |
-          curl -f -X POST "${{ secrets.BOT_URL }}" \
-          -H "Authorization: Bearer ${{ secrets.BOT_TOKEN }}" \
+          curl -f -X POST "${{ secrets.ACTION_URL }}" \
+          -H "Authorization: Bearer ${{ secrets.TOKEN }}" \
           -F "hash=$COMMIT_HASH" \
           -F "full_hash=$COMMIT_FULL_HASH" \
           -F "author_name=$COMMIT_AUTHOR_NAME" \
