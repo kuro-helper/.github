@@ -24,11 +24,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: "1.26.0"
-
       - name: Checkout Commit Lint Scripts
         uses: actions/checkout@v5
         with:
@@ -36,7 +31,7 @@ jobs:
           path: common-workflow-project
 
       - name: Run Commit Lint Script
-        run: go run common-workflow-project/scripts/check_commit.go
+        run: bash common-workflow-project/scripts/check_commit.sh
         env:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           GITHUB_HEAD_REF: ${{ github.event.pull_request.head.ref || '' }}
