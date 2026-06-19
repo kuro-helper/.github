@@ -6,6 +6,10 @@ on:
       use_kurohelperservice:
         type: string
         default: ''
+      linux_binary_name:
+        description: 'If set, also build a Linux binary and upload it as an artifact'
+        type: string
+        default: ''
 
 jobs:
   build:
@@ -45,5 +49,31 @@ jobs:
           cd main
           go build -v ./...
 
-      # - name: Test
-      #   run: go test -v ./...
+      - name: Build Linux binary
+        if: ${{ inputs.linux_binary_name != '' }}
+        working-directory: main
+        env:
+          GOOS: linux
+          GOARCH: amd64
+          CGO_ENABLED: '0'
+          OUTPUT_NAME: ${{ inputs.linux_binary_name }}
+        run: |
+          set -euo pipefail
+          if [ -f cmd/main.go ]; then
+            entrypoint=./cmd/main.go
+          elif [ -f main.go ]; then
+            entrypoint=.
+          else
+            echo "::error::Cannot detect Go entrypoint."
+            exit 1
+          fi
+          go build -ldflags="-s -w" -trimpath -o "$OUTPUT_NAME" "$entrypoint"
+
+      - name: Upload Linux binary
+        if: ${{ inputs.linux_binary_name != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-binary
+          path: main/${{ inputs.linux_binary_name }}
+          if-no-files-found: error
+          retention-days: 7
