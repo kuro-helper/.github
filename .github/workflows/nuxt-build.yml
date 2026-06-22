@@ -27,6 +27,10 @@ jobs:
         working-directory: main
         run: yarn install --frozen-lockfile
 
+      - name: Run lint
+        working-directory: main
+        run: yarn lint
+
       - name: Build
         working-directory: main
         run: |
