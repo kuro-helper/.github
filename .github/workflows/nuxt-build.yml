@@ -1,0 +1,53 @@
+name: Nuxt Build
+
+on:
+  workflow_call:
+    inputs:
+      nuxt_output_name:
+        description: 'If set, also package .output and upload it as an artifact'
+        type: string
+        default: ''
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: yarn
+          cache-dependency-path: main/yarn.lock
+
+      - name: Install dependencies
+        working-directory: main
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        working-directory: main
+        run: |
+          set -euo pipefail
+          # CI does not inject API config; runtime .env is provided on VPS
+          npx nuxt build
+
+      - name: Package build output
+        if: ${{ inputs.nuxt_output_name != '' }}
+        working-directory: main
+        env:
+          OUTPUT_NAME: ${{ inputs.nuxt_output_name }}
+        run: |
+          set -euo pipefail
+          mv .output "$OUTPUT_NAME"
+
+      - name: Upload build output
+        if: ${{ inputs.nuxt_output_name != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuxt-output
+          path: main/${{ inputs.nuxt_output_name }}
+          if-no-files-found: error
+          retention-days: 7
