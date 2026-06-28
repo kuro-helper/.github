@@ -20,7 +20,7 @@ else
   COMMITS="$(git log --pretty=format:%s -1 HEAD)"
 fi
 
-PATTERN='^(feat|fix|docs|style|refactor|test|chore|ci|release)(\([a-z0-9_/.-]+\))?: [a-z].+'
+PATTERN='^(feat|fix|docs|style|refactor|test|chore|ci|release)(\([a-z0-9_/.-]+\))?: [a-zA-Z].+'
 
 FAILED=0
 while read -r commit; do
