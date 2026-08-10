@@ -8,6 +8,10 @@ on:
         required: false
         type: string
         default: ''
+      linux_binary_name:
+        description: 'Linux 執行檔輸出名稱'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -44,14 +48,14 @@ jobs:
     uses: kuro-helper/.github/.github/workflows/go-build.yml@main
     with:
       use_kurohelperservice: ${{ inputs.kurohelperservice_ref }}
-      linux_binary_name: ${{ format('{0}-linux-amd64-{1}', github.event.repository.name, github.ref_name) }}
+      linux_binary_name: ${{ inputs.linux_binary_name }}
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     env:
       REPO_NAME: ${{ github.event.repository.name }}
-      BINARY_NAME: ${{ format('{0}-linux-amd64-{1}', github.event.repository.name, github.ref_name) }}
+      BINARY_NAME: ${{ inputs.linux_binary_name }}
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
