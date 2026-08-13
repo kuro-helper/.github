@@ -3,15 +3,15 @@ name: Go Deploy
 on:
   workflow_call:
     inputs:
-      kurohelperservice_ref:
-        description: 'kurohelper-service 依賴使用的版本 ref'
+      linux_binary_name:
+        description: 'Linux 執行檔名稱'
+        required: true
+        type: string
+      systemd_service:
+        description: 'systemd --user 服務名稱（不含 .service；空字串則不停/啟服務）'
         required: false
         type: string
         default: ''
-      linux_binary_name:
-        description: 'Linux 執行檔輸出名稱'
-        required: true
-        type: string
 
 permissions:
   contents: read
@@ -40,28 +40,31 @@ jobs:
             exit 1
           fi
 
-  build:
-    needs: preflight
-    permissions:
-      contents: read
-      actions: write
-    uses: kuro-helper/.github/.github/workflows/go-build.yml@main
-    with:
-      use_kurohelperservice: ${{ inputs.kurohelperservice_ref }}
-      linux_binary_name: ${{ inputs.linux_binary_name }}
-
   deploy:
-    needs: build
+    needs: preflight
     runs-on: ubuntu-latest
     env:
       REPO_NAME: ${{ github.event.repository.name }}
       BINARY_NAME: ${{ inputs.linux_binary_name }}
+      SERVICE_NAME: ${{ inputs.systemd_service }}
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: linux-binary
           path: dist
+
+      - name: Stop systemd service
+        if: ${{ inputs.systemd_service != '' }}
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            systemctl --user stop "${{ env.SERVICE_NAME }}.service" || true
 
       - name: Upload binary to VPS
         uses: appleboy/scp-action@v1.0.0
@@ -74,7 +77,7 @@ jobs:
           strip_components: 1
           overwrite: true
 
-      - name: Set executable permissions
+      - name: chmod and start systemd service
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_IP }}
@@ -84,7 +87,9 @@ jobs:
           script: |
             set -euo pipefail
             chmod u+x "${{ secrets.VPS_DEPLOY_BASE }}/${{ env.REPO_NAME }}/${{ env.BINARY_NAME }}"
-            echo "已設定執行權限：${{ env.BINARY_NAME }}"
+            if [ -n "${{ env.SERVICE_NAME }}" ]; then
+              systemctl --user start "${{ env.SERVICE_NAME }}.service"
+            fi
 
       - name: Show deployment info
         run: |
