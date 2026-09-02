@@ -2,6 +2,12 @@ name: Nuxt Deploy
 
 on:
   workflow_call:
+    inputs:
+      systemd_service:
+        description: 'systemd --user 服務名稱（不含 .service；空字串則不停/啟服務）'
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -35,12 +41,25 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REPO_NAME: ${{ github.event.repository.name }}
+      SERVICE_NAME: ${{ inputs.systemd_service }}
     steps:
       - name: Download build output
         uses: actions/download-artifact@v4
         with:
           name: nuxt-output
           path: dist
+
+      - name: Stop systemd service
+        if: ${{ inputs.systemd_service != '' }}
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            systemctl --user stop "${{ env.SERVICE_NAME }}.service" || true
 
       - name: Ensure remote deploy directory
         uses: appleboy/ssh-action@v1.2.0
@@ -64,7 +83,22 @@ jobs:
           strip_components: 1
           overwrite: true
 
+      - name: Start systemd service
+        if: ${{ inputs.systemd_service != '' }}
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            systemctl --user start "${{ env.SERVICE_NAME }}.service"
+
       - name: Show deployment info
         run: |
           echo "部署 ref：${{ github.ref }} (${{ github.sha }})"
           echo "已部署至 ${{ secrets.VPS_DEPLOY_BASE }}/${{ env.REPO_NAME }}/"
+          if [ -n "${{ env.SERVICE_NAME }}" ]; then
+            echo "已重啟 systemd 服務：${{ env.SERVICE_NAME }}.service"
+          fi
